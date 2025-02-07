@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm: Neighbors</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        const game = new Phaser.Game(config);
+        let field = [];
+
+        function preload() {
+            this.load.image('ground', 'https://i.imgur.com/QzE77CV.png'); // Грядка
+            this.load.spritesheet('wheat', 'https://i.imgur.com/PzHTPZb.png', { frameWidth: 32, frameHeight: 32 }); // Рост пшеницы
+        }
+
+        function create() {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    let tile = this.add.image(150 + j * 100, 150 + i * 100, 'ground').setInteractive();
+                    tile.setData('state', 'empty');
+
+                    tile.on('pointerdown', function () {
+                        if (this.getData('state') === 'empty') {
+                            this.setData('state', 'growing');
+                            let wheat = this.scene.add.sprite(this.x, this.y, 'wheat', 0);
+                            wheat.setData('growth', 0);
+                            field.push(wheat);
+                        }
+                    });
+
+                    field.push(tile);
+                }
+            }
+
+            this.anims.create({
+                key: 'grow',
+                frames: this.anims.generateFrameNumbers('wheat', { start: 0, end: 3 }),
+                frameRate: 1,
+                repeat: 0
+            });
+        }
+
+        function update() {
+            field.forEach(tile => {
+                if (tile.getData('state') === 'growing') {
+                    let wheat = tile;
+                    if (wheat.getData('growth') < 4) {
+                        wheat.setData('growth', wheat.getData('growth') + 0.01);
+                        if (wheat.getData('growth') >= 4) {
+                            wheat.setData('state', 'ready');
+                            wheat.play('grow');
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
