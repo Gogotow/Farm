@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm: Neighbors</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .field { display: grid; grid-template-columns: repeat(3, 100px); gap: 10px; justify-content: center; }
+        .plot { width: 100px; height: 100px; background-color: #8B4513; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        button { margin-top: 20px; padding: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>🌾 Добро пожаловать в Ферму!</h1>
+    <p>Нажмите на грядку, чтобы посадить урожай.</p>
+    <div class="field">
+        <div class="plot" onclick="plantCrop(this)">🌱</div>
+        <div class="plot" onclick="plantCrop(this)">🌱</div>
+        <div class="plot" onclick="plantCrop(this)">🌱</div>
+    </div>
+    <button onclick="saveFarm()">💾 Сохранить ферму</button>
+    
+    <script>
+        let userId = "12345"; // Здесь будет ID пользователя из Telegram
+        
+        async function loadFarm() {
+            const response = await fetch(`https://your-api-url.com/farm/${userId}`);
+            const data = await response.json();
+            const plots = document.querySelectorAll(".plot");
+            const crops = data.plots.split(",");
+            plots.forEach((plot, index) => plot.innerText = crops[index] || "🌱");
+        }
+        
+        function plantCrop(plot) {
+            plot.innerText = "🌽";
+        }
+        
+        async function saveFarm() {
+            const plots = document.querySelectorAll(".plot");
+            const plotData = Array.from(plots).map(plot => plot.innerText).join(",");
+            await fetch("https://your-api-url.com/farm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, plots: plotData })
+            });
+            alert("Ферма сохранена!");
+        }
+        
+        loadFarm();
+    </script>
+</body>
+</html>
